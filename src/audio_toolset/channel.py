@@ -14,7 +14,7 @@ from audio_toolset.processing.filters import (
     apply_parametric_band,
 )
 from audio_toolset.processing.gain import apply_fade, apply_gain, normalize_to_target
-from audio_toolset.processing.noise_reduction import apply_spectral_gating
+from audio_toolset.processing.noise_reduction import apply_noise_reduction
 
 
 class Channel:
@@ -201,7 +201,10 @@ class Channel:
         return self
 
     def noise_reduction(
-        self, noise_threshold_db: float = -50, attenuation_db: float = -1
+        self,
+        noise_threshold_db: float = -50,
+        attenuation_db: float = -1,
+        smooth: bool = True,
     ) -> "Channel":
         """
         Reduce background noise by attenuating low-level signals below a threshold.
@@ -211,14 +214,18 @@ class Channel:
                 attenuated in dBFS. Defaults to -50 dB.
             attenuation_db (float, optional): Amount of attenuation applied to noise \
                 in dB. Defaults to -1 dB.
+            smooth (bool, optional): If True, uses a Wiener filter for smooth \
+                per-bin attenuation. If False, uses hard spectral gating. \
+                Defaults to True.
 
         Returns:
             Channel: Returns self for chaining.
         """
-        self.audio_data = apply_spectral_gating(
+        self.audio_data = apply_noise_reduction(
             audio_data=self.audio_data,
             noise_threshold_db=noise_threshold_db,
             attenuation_db=attenuation_db,
+            smooth=smooth,
         )
         return self
 
